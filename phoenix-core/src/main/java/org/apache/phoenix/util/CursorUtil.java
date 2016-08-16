@@ -98,7 +98,7 @@ public final class CursorUtil {
                             whereBuilder.append(") ?< (");
                         }
                         while(lhsLength > 0){
-                            whereBuilder.append(":").append(Integer.toString(colBinding-lhsLength));
+                            whereBuilder.append("::").append(Integer.toString(colBinding-lhsLength));
                             if(lhsLength > 1){
                                 whereBuilder.append(',');
                             } else{
@@ -161,7 +161,7 @@ public final class CursorUtil {
                         whereBuilder.append(") ?< (");
                     }
                     while(lhsLength > 0){
-                        whereBuilder.append(":").append(Integer.toString(colBinding-lhsLength));
+                        whereBuilder.append("::").append(Integer.toString(colBinding-lhsLength));
                         if(lhsLength > 1){
                             whereBuilder.append(',');
                         } else{
@@ -195,7 +195,7 @@ public final class CursorUtil {
             }
             if(lhsLength>0) whereBuilder.append(") ?> (");
             while(lhsLength>0){
-                whereBuilder.append(":").append(colBinding-lhsLength);
+                whereBuilder.append("::").append(colBinding-lhsLength);
                 if(lhsLength > 1){
                     whereBuilder.append(',');
                 } else{
@@ -247,11 +247,11 @@ public final class CursorUtil {
                     PDataType type = projector.getExpression().getDataType();
                     Object value = projector.getValue(currentRow, type, new ImmutableBytesPtr());
                     if(value == null){
-                        whereExpressionNext = whereExpressionNext.replaceFirst(":"+Integer.toString(colBinding),"NULL");
-                        whereExpressionPrior = whereExpressionPrior.replaceFirst(":"+Integer.toString(colBinding),"NULL");
+                        whereExpressionNext = whereExpressionNext.replaceFirst("::"+Integer.toString(colBinding),"NULL");
+                        whereExpressionPrior = whereExpressionPrior.replaceFirst("::"+Integer.toString(colBinding),"NULL");
                     } else{
-                        whereExpressionNext = whereExpressionNext.replaceFirst(":"+Integer.toString(colBinding),formatString(value, type));
-                        whereExpressionPrior = whereExpressionPrior.replaceFirst(":"+Integer.toString(colBinding),formatString(value, type));
+                        whereExpressionNext = whereExpressionNext.replaceFirst("::"+Integer.toString(colBinding),formatString(value, type));
+                        whereExpressionPrior = whereExpressionPrior.replaceFirst("::"+Integer.toString(colBinding),formatString(value, type));
                     }
                     ++colBinding;
                 }

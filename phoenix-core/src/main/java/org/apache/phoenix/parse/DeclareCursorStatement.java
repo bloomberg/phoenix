@@ -39,17 +39,8 @@ public class DeclareCursorStatement implements BindableStatement {
     }
 
     public String getQuerySQL(){
-        //Check if there are parameters to bind.
-        if(select.getBindCount() > 0){
-
-        }
-        //TODO: Test if this works
         return select.toString();
     }
-
-    //public SelectStatement getSelect(){
-    //return select;
-    //}
 
     public List<OrderByNode> getSelectOrderBy() {
         return select.getOrderBy();
