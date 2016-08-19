@@ -37,14 +37,13 @@ import java.util.*;
 public final class CursorUtil {
 
     private static class CursorWrapper {
-        private final int fetchSize = 1;
+        private final int fetchSize = 10;
         private final List<String> listSelectColNames;
         private final String cursorName;
         private final String selectSQL;
         private final List<OrderByNode> orderBy;
 
         private boolean isOpen = false;
-        //private Connection connection;
         private RowProjector rowProjector;
         //TODO: Make use of 'appendedColumnCount' to remove columns added to the query.
         //private int appendedColumnCount = 0;
@@ -235,6 +234,10 @@ public final class CursorUtil {
             return this.cursorName;
         }
 
+        private int getFetchSize(){
+            return this.fetchSize;
+        }
+
         private void updateSelectValues(Tuple currentRow) throws SQLException {
             if(currentRow != null){
                 whereExpressionNext = whereExpression.replaceAll("\\?>", ">").replaceAll("\\?<=","<=").replaceAll("\\?<","<");
@@ -325,6 +328,14 @@ public final class CursorUtil {
     public static String getFetchSQL(String cursorName, boolean isNext) throws SQLException {
         if(mapCursorIDQuery.containsKey(cursorName)){
             return mapCursorIDQuery.get(cursorName).getFetchSQL(isNext);
+        } else {
+            throw new SQLException("Cursor " + cursorName + " not declared.");
+        }
+    }
+
+    public static int getFetchSize(String cursorName) throws SQLException {
+        if(mapCursorIDQuery.containsKey(cursorName)){
+            return mapCursorIDQuery.get(cursorName).getFetchSize();
         } else {
             throw new SQLException("Cursor " + cursorName + " not declared.");
         }

@@ -87,18 +87,46 @@ public class CursorWithRowValueConstructorIT extends BaseClientManagedTimeIT {
             cursorSQL = "OPEN testCursor";
             DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).execute();
             cursorSQL = "FETCH NEXT FROM testCursor";
+            long currentTime = System.currentTimeMillis();
             ResultSet rs = DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).executeQuery();
             int rowID = 0;
             while(rs.next()){
                 assertEquals(rowID,rs.getInt(1));
                 ++rowID;
-                rs = DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).executeQuery();
+                if((rowID % CursorUtil.getFetchSize("testCursor")) == 0){
+                    rs = DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).executeQuery();
+                    //LOG.debug("Row count: " + rowID);
+                }
             }
+            assertEquals(100, rowID);
+            long endTime = System.currentTimeMillis();
+            LOG.debug("Execution time: " + Long.toString(endTime-currentTime));
         } finally{
             DriverManager.getConnection(getUrl()).prepareStatement("CLOSE testCursor").execute();
             deleteTestTable();
         }
+    }
 
+    @Test
+    public void randomBenchmarkTest() throws SQLException {
+        try {
+            createAndInitializeTestTable();
+            String querySQL = "SELECT a_id FROM " + TABLE_NAME;
+            long currentTime = System.currentTimeMillis();
+            ResultSet rs = DriverManager.getConnection(getUrl()).prepareStatement(querySQL).executeQuery();
+            int rowID = 0;
+            while (rs.next()) {
+                assertEquals(rowID, rs.getInt(1));
+                ++rowID;
+                if(rowID == 50) break;
+            }
+            //assertEquals(100, rowID);
+            long endTime = System.currentTimeMillis();
+            LOG.debug("Execution time: " + Long.toString(endTime - currentTime));
+        } finally {
+            DriverManager.getConnection(getUrl()).prepareStatement("CLOSE testCursor").execute();
+            deleteTestTable();
+        }
     }
 
     @Test
