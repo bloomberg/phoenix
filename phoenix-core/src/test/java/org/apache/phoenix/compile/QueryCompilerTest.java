@@ -1453,7 +1453,21 @@ public class QueryCompilerTest extends BaseConnectionlessQueryTest {
             }
         }
     }
-    
+    @Test
+    public void testValidPrimaryKeyDecl() throws Exception {
+        String[] queries = {
+                "CREATE TABLE t (k varchar primary key)",
+                "CREATE TABLE t (k varchar, constraint pk primary key (k))",
+        };
+        Connection conn = DriverManager.getConnection(getUrl());
+        for (String query : queries) {
+            try {
+                conn.createStatement().execute(query);
+            } catch (SQLException e) {
+                fail("Compilation should have succeeded as the column is implicitly not nullable: " + e.getMessage());
+            }
+        }
+    }
     @Test
     public void testInvalidNullCompositePrimaryKey() throws Exception {
         Connection conn = DriverManager.getConnection(getUrl());
