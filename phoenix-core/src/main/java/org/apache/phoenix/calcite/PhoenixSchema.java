@@ -117,14 +117,9 @@ public class PhoenixSchema implements Schema {
         }
         Collection<FunctionParseNode.BuiltInFunctionInfo>  infoCollection = ParseNodeFactory.getAll();
         for (FunctionParseNode.BuiltInFunctionInfo info : infoCollection) {
-            try {
-                if(!CalciteUtils.TRANSLATED_BUILT_IN_FUNCTIONS.contains(info.getName())) {
-                    builtinFunctions.put(info.getName(),
-                            (List<Function>)(Object)PhoenixScalarFunction.createBuiltinFunctions(info));
-                }
-            }
-            catch(RuntimeException e){
-                System.out.println("Function not registered: " + info.getName()); // Function couldn't be registered
+            if(!CalciteUtils.TRANSLATED_BUILT_IN_FUNCTIONS.contains(info.getName())) {
+                builtinFunctions.put(info.getName(),
+                        (List<Function>) (Object) PhoenixScalarFunction.createBuiltinFunctions(info));
             }
         }
 
