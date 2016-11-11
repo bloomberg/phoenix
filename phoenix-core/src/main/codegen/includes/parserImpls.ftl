@@ -330,26 +330,26 @@ SqlNode SqlCreateSequence() :
     sequenceName = DualIdentifier()
     [
         <START> [ <WITH> ]
-        v = UnsignedIntLiteral() { startWith = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
+        v = IntLiteral() { startWith = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
     ]
     [
         <INCREMENT> [ <BY> ]
-        v = UnsignedIntLiteral() { incrementBy = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
+        v = IntLiteral() { incrementBy = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
     ]
     [
         <MINVALUE>
-        v = UnsignedIntLiteral() { minValue = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
+        v = IntLiteral() { minValue = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
     ]
     [
         <MAXVALUE>
-        v = UnsignedIntLiteral() { maxValue = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
+        v = IntLiteral() { maxValue = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
     ]
     [
         <CYCLE> { cycle = true; }
     ]
     [
         <CACHE>
-        v = UnsignedIntLiteral() { cache = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
+        v = IntLiteral() { cache = SqlLiteral.createExactNumeric(v.toString(), getPos()); }
     ]
     {
         return new SqlCreateSequence(pos.plus(getPos()), sequenceName,
