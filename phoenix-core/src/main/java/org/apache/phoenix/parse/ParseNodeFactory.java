@@ -129,20 +129,28 @@ public class ParseNodeFactory {
         }
         int nArgs = d.args().length;
         BuiltInFunctionInfo value = new BuiltInFunctionInfo(f, d);
-        SINGLE_SIGNATURE_BUILT_IN_FUNCTION_MAP.put(value.getName(), value);
-        do {
-            // Add function to function map, throwing if conflicts found
-            // Add entry for each possible version of function based on arguments that are not required to be present (i.e. arg with default value)
-            BuiltInFunctionKey key = new BuiltInFunctionKey(value.getName(), nArgs);
-            if (BUILT_IN_FUNCTION_MAP.put(key, value) != null) {
-                throw new IllegalStateException("Multiple " + value.getName() + " functions with " + nArgs + " arguments");
-            }
-        } while (--nArgs >= 0 && d.args()[nArgs].defaultValue().length() > 0);
 
-        // Look for default values that aren't at the end and throw
-        while (--nArgs >= 0) {
-            if (d.args()[nArgs].defaultValue().length() > 0) {
-                throw new IllegalStateException("Function " + value.getName() + " has non trailing default value of '" + d.args()[nArgs].defaultValue() + "'. Only trailing arguments may have default values");
+        if (d.classType() != FunctionParseNode.FunctionClassType.ABSTRACT) {
+            System.out.println(value.getName());
+            System.out.println(value.getClassType());
+            System.out.println(value.getFunc().getName());
+            SINGLE_SIGNATURE_BUILT_IN_FUNCTION_MAP.put(value.getName(), value);
+        }
+        if (d.classType() != FunctionParseNode.FunctionClassType.DERIVED) {
+            do {
+                // Add function to function map, throwing if conflicts found
+                // Add entry for each possible version of function based on arguments that are not required to be present (i.e. arg with default value)
+                BuiltInFunctionKey key = new BuiltInFunctionKey(value.getName(), nArgs);
+                if (BUILT_IN_FUNCTION_MAP.put(key, value) != null) {
+                    throw new IllegalStateException("Multiple " + value.getName() + " functions with " + nArgs + " arguments");
+                }
+            } while (--nArgs >= 0 && d.args()[nArgs].defaultValue().length() > 0);
+
+            // Look for default values that aren't at the end and throw
+            while (--nArgs >= 0) {
+                if (d.args()[nArgs].defaultValue().length() > 0) {
+                    throw new IllegalStateException("Function " + value.getName() + " has non trailing default value of '" + d.args()[nArgs].defaultValue() + "'. Only trailing arguments may have default values");
+                }
             }
         }
     }

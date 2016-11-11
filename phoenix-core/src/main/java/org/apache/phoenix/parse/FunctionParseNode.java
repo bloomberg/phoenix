@@ -284,6 +284,8 @@ public class FunctionParseNode extends CompoundParseNode {
         String name();
         Argument[] args() default {};
         Class<? extends FunctionParseNode> nodeClass() default FunctionParseNode.class;
+        Class<? extends FunctionExpression>[] derivedFunctions() default {};
+        FunctionClassType classType() default FunctionClassType.NONE;
     }
 
     @Retention(RetentionPolicy.RUNTIME)
@@ -298,6 +300,12 @@ public class FunctionParseNode extends CompoundParseNode {
         String maxValue() default "";
     }
 
+    public enum FunctionClassType {
+        NONE,
+        ABSTRACT,
+        DERIVED
+    }
+
     /**
      * Structure used to hold parse-time information about Function implementation classes
      */
@@ -310,6 +318,7 @@ public class FunctionParseNode extends CompoundParseNode {
         private final BuiltInFunctionArgInfo[] args;
         private final boolean isAggregate;
         private final int requiredArgCount;
+        private final FunctionClassType classType;
 
         public BuiltInFunctionInfo(Class<? extends FunctionExpression> f, BuiltInFunction d) {
             this.name = SchemaUtil.normalizeIdentifier(d.name());
@@ -326,6 +335,7 @@ public class FunctionParseNode extends CompoundParseNode {
             }
             this.requiredArgCount = requiredArgCount;
             this.isAggregate = AggregateFunction.class.isAssignableFrom(f);
+            this.classType = d.classType();
         }
 
         public BuiltInFunctionInfo(PFunction function) {
@@ -343,6 +353,7 @@ public class FunctionParseNode extends CompoundParseNode {
             }
             this.requiredArgCount = requiredArgCount;
             this.isAggregate = AggregateFunction.class.isAssignableFrom(UDFExpression.class);
+            this.classType = FunctionClassType.NONE;
         }
 
         public int getRequiredArgCount() {
@@ -373,12 +384,17 @@ public class FunctionParseNode extends CompoundParseNode {
             return args;
         }
 
+        public FunctionClassType getClassType() {
+            return classType;
+        }
+
         public List<List<FunctionArgument>> overloadArguments(){
             List<List<FunctionArgument>> overloadedArgs = Lists.newArrayList();
             int solutions = 1;
             for(int i = 0; i < args.length; solutions *= args[i].getAllowedTypes().length, i++);
             for(int i = 0; i < solutions; i++) {
                 int j = 1;
+                short k = 0;
                 overloadedArgs.add(new ArrayList<FunctionArgument>());
                 for(BuiltInFunctionArgInfo arg : args) {
                     Class<? extends PDataType>[] temp = arg.getAllowedTypes();
@@ -390,8 +406,9 @@ public class FunctionParseNode extends CompoundParseNode {
                             arg.getDefaultValue(),
                             arg.getMinValue(),
                             arg.getMaxValue(),
-                            (short)i));
+                            k));
 
+                    k++;
                     j *= temp.length;
                 }
             }

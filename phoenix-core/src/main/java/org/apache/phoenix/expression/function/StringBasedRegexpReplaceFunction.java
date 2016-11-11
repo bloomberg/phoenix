@@ -20,9 +20,12 @@ package org.apache.phoenix.expression.function;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.expression.Expression;
 import org.apache.phoenix.expression.util.regex.AbstractBasePattern;
 import org.apache.phoenix.expression.util.regex.JavaPattern;
+import org.apache.phoenix.query.QueryServices;
+import org.apache.phoenix.query.QueryServicesOptions;
 
 public class StringBasedRegexpReplaceFunction extends RegexpReplaceFunction {
 
@@ -31,6 +34,18 @@ public class StringBasedRegexpReplaceFunction extends RegexpReplaceFunction {
 
     public StringBasedRegexpReplaceFunction(List<Expression> children) {
         super(children);
+    }
+
+    public static Expression create(List<Expression> children, StatementContext context) {
+        QueryServices services = context.getConnection().getQueryServices();
+        boolean useByteBasedRegex =
+                services.getProps().getBoolean(QueryServices.USE_BYTE_BASED_REGEX_ATTRIB,
+                        QueryServicesOptions.DEFAULT_USE_BYTE_BASED_REGEX);
+        if (useByteBasedRegex) {
+            return new ByteBasedRegexpReplaceFunction(children);
+        } else {
+            return new StringBasedRegexpReplaceFunction(children);
+        }
     }
 
     @Override

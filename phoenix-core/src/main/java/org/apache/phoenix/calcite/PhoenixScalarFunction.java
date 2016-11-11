@@ -133,7 +133,7 @@ public class PhoenixScalarFunction implements ScalarFunction, ImplementableFunct
                     functionList.add(new PhoenixScalarFunction(parseInfo, parameters, returnType));
                 }
             } catch (Exception e){
-                throw new RuntimeException(e);
+                throw new RuntimeException(parseInfo.getName(), e);
             }
         }
         return functionList;

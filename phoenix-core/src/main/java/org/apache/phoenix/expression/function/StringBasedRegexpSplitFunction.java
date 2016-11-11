@@ -17,11 +17,15 @@
  */
 package org.apache.phoenix.expression.function;
 
+import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.expression.Expression;
 import org.apache.phoenix.expression.util.regex.AbstractBaseSplitter;
 import org.apache.phoenix.expression.util.regex.GuavaSplitter;
+import org.apache.phoenix.query.QueryServices;
+import org.apache.phoenix.query.QueryServicesOptions;
 
 public class StringBasedRegexpSplitFunction extends RegexpSplitFunction {
     public StringBasedRegexpSplitFunction() {
@@ -29,6 +33,19 @@ public class StringBasedRegexpSplitFunction extends RegexpSplitFunction {
 
     public StringBasedRegexpSplitFunction(List<Expression> children) {
         super(children);
+    }
+
+    public Expression create(List<Expression> children, StatementContext context)
+            throws SQLException {
+        QueryServices services = context.getConnection().getQueryServices();
+        boolean useByteBasedRegex =
+                services.getProps().getBoolean(QueryServices.USE_BYTE_BASED_REGEX_ATTRIB,
+                        QueryServicesOptions.DEFAULT_USE_BYTE_BASED_REGEX);
+        if (useByteBasedRegex) {
+            return new ByteBasedRegexpSplitFunction(children);
+        } else {
+            return new StringBasedRegexpSplitFunction(children);
+        }
     }
 
     @Override

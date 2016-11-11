@@ -17,19 +17,48 @@
  */
 package org.apache.phoenix.expression.function;
 
+import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.expression.Expression;
 import org.apache.phoenix.expression.util.regex.AbstractBasePattern;
 import org.apache.phoenix.expression.util.regex.JONIPattern;
+import org.apache.phoenix.parse.FunctionParseNode.BuiltInFunction;
+import org.apache.phoenix.parse.FunctionParseNode.Argument;
+import org.apache.phoenix.parse.FunctionParseNode.FunctionClassType;
+import org.apache.phoenix.query.QueryServices;
+import org.apache.phoenix.query.QueryServicesOptions;
+import org.apache.phoenix.schema.types.PVarchar;
 import org.joni.Option;
 
+@BuiltInFunction(name = RegexpSubstrFunction.NAME,
+        args = {
+                @Argument(allowedTypes={PVarchar.class}),
+                @Argument(allowedTypes={PVarchar.class}),
+                @Argument(allowedTypes={PVarchar.class},defaultValue="null")
+        },
+        classType = FunctionClassType.DERIVED
+)
 public class ByteBasedRegexpSubstrFunction extends RegexpSubstrFunction {
     public ByteBasedRegexpSubstrFunction() {
     }
 
     public ByteBasedRegexpSubstrFunction(List<Expression> children) {
         super(children);
+    }
+
+    public Expression create(List<Expression> children, StatementContext context)
+            throws SQLException {
+        QueryServices services = context.getConnection().getQueryServices();
+        boolean useByteBasedRegex =
+                services.getProps().getBoolean(QueryServices.USE_BYTE_BASED_REGEX_ATTRIB,
+                        QueryServicesOptions.DEFAULT_USE_BYTE_BASED_REGEX);
+        if (useByteBasedRegex) {
+            return new ByteBasedRegexpSubstrFunction(children);
+        } else {
+            return new StringBasedRegexpSubstrFunction(children);
+        }
     }
 
     @Override

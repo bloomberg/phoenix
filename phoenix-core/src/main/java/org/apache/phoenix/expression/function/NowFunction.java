@@ -31,7 +31,7 @@ import org.apache.phoenix.parse.FunctionParseNode.BuiltInFunction;
  *
  */
 @BuiltInFunction(name = NowFunction.NAME,
-nodeClass=CurrentDateParseNode.class, args= {})
+nodeClass=CurrentDateParseNode.class, args= {}, derivedFunctions = {CurrentDateFunction.class})
 public abstract class NowFunction extends ScalarFunction {
     
     public static final String NAME = "NOW";

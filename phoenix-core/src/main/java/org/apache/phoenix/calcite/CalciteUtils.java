@@ -1,5 +1,6 @@
 package org.apache.phoenix.calcite;
 
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -56,6 +57,7 @@ import org.apache.calcite.util.Util;
 import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.io.ImmutableBytesWritable;
 import org.apache.phoenix.calcite.rel.PhoenixRelImplementor;
+import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.expression.AndExpression;
 import org.apache.phoenix.expression.CoerceExpression;
 import org.apache.phoenix.expression.ComparisonExpression;
@@ -87,6 +89,7 @@ import org.apache.phoenix.expression.function.AbsFunction;
 import org.apache.phoenix.expression.function.AggregateFunction;
 import org.apache.phoenix.expression.function.CeilDateExpression;
 import org.apache.phoenix.expression.function.CeilDecimalExpression;
+import org.apache.phoenix.expression.function.CeilFunction;
 import org.apache.phoenix.expression.function.CeilTimestampExpression;
 import org.apache.phoenix.expression.function.CoalesceFunction;
 import org.apache.phoenix.expression.function.CountAggregateFunction;
@@ -95,6 +98,7 @@ import org.apache.phoenix.expression.function.CurrentTimeFunction;
 import org.apache.phoenix.expression.function.ExpFunction;
 import org.apache.phoenix.expression.function.FloorDateExpression;
 import org.apache.phoenix.expression.function.FloorDecimalExpression;
+import org.apache.phoenix.expression.function.FloorFunction;
 import org.apache.phoenix.expression.function.FunctionExpression;
 import org.apache.phoenix.expression.function.LnFunction;
 import org.apache.phoenix.expression.function.LowerFunction;
@@ -158,7 +162,9 @@ public class CalciteUtils {
             CurrentTimeFunction.NAME,
             LowerFunction.NAME,
             UpperFunction.NAME,
-            CoalesceFunction.NAME);
+            CoalesceFunction.NAME,
+            CeilFunction.NAME,
+            FloorFunction.NAME);
 
     public static String createTempAlias() {
         return "$" + tempAliasCounter.incrementAndGet();
@@ -787,9 +793,20 @@ public class CalciteUtils {
                             if(scalarFunc.getParseInfo() != null){
                                 BuiltInFunctionInfo parseInfo = scalarFunc.getParseInfo();
                                 try {
-                                    FunctionParseNode parseNode = parseInfo.getNodeCtor().newInstance(parseInfo.getName(), Lists.newArrayList(), parseInfo);
-                                    assert(parseNode != null);
-                                    return parseNode.create(children, implementor.getStatementContext());
+                                    if(parseInfo.getClassType() == FunctionParseNode.FunctionClassType.DERIVED){
+                                        try {
+                                            return (Expression) parseInfo.getFunc().getDeclaredMethod("create", List.class).invoke(null, children);
+                                        } catch (Exception e){
+                                            return (Expression) parseInfo.getFunc().getDeclaredMethod("create", List.class, StatementContext.class).invoke(null, children, implementor.getStatementContext());
+                                        }
+                                    }
+                                    if(parseInfo.getClassType() == FunctionParseNode.FunctionClassType.NONE){
+                                        try {
+                                            return (Expression) parseInfo.getFunc().getDeclaredConstructor(List.class).newInstance(children);
+                                        } catch (Exception e){
+                                            return (Expression) parseInfo.getFunc().getDeclaredConstructor(List.class, StatementContext.class).newInstance(children, implementor.getStatementContext());
+                                        }
+                                    }
                                 } catch (Exception e) {throw new RuntimeException ("Failed to create builtin function " + parseInfo.getName(), e);}
                             }
                             return new UDFExpression(children, scalarFunc.getFunctionInfo());
