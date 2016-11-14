@@ -30,6 +30,7 @@ import org.apache.phoenix.expression.Expression;
 import org.apache.phoenix.iterate.CursorResultIterator;
 import org.apache.phoenix.iterate.FilterResultIterator;
 import org.apache.phoenix.iterate.LimitingResultIterator;
+import org.apache.phoenix.iterate.LookAheadResultIterator;
 import org.apache.phoenix.iterate.OffsetResultIterator;
 import org.apache.phoenix.iterate.OrderedResultIterator;
 import org.apache.phoenix.iterate.ParallelScanGrouper;
@@ -79,7 +80,7 @@ public class ClientScanPlan extends ClientProcessingPlan {
             iterator = new SequenceResultIterator(iterator, context.getSequenceManager());
         }
         if (cursorName != null){
-            iterator = new CursorResultIterator(iterator, cursorName);
+            iterator = new CursorResultIterator(LookAheadResultIterator.wrap(iterator), cursorName);
         }
         
         return iterator;

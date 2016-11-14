@@ -39,6 +39,7 @@ import org.apache.phoenix.iterate.ChunkedResultIterator;
 import org.apache.phoenix.iterate.ConcatResultIterator;
 import org.apache.phoenix.iterate.CursorResultIterator;
 import org.apache.phoenix.iterate.LimitingResultIterator;
+import org.apache.phoenix.iterate.LookAheadResultIterator;
 import org.apache.phoenix.iterate.MergeSortRowKeyResultIterator;
 import org.apache.phoenix.iterate.MergeSortTopNResultIterator;
 import org.apache.phoenix.iterate.OffsetResultIterator;
@@ -259,7 +260,7 @@ public class ScanPlan extends BaseQueryPlan {
             scanner = new SequenceResultIterator(scanner, context.getSequenceManager());
         }
         if (cursorName != null) {
-            scanner = new CursorResultIterator(scanner, cursorName);
+            scanner = new CursorResultIterator(LookAheadResultIterator.wrap(scanner), cursorName);
         }
         return scanner;
     }

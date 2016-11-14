@@ -43,6 +43,7 @@ import org.apache.phoenix.iterate.DistinctAggregatingResultIterator;
 import org.apache.phoenix.iterate.FilterAggregatingResultIterator;
 import org.apache.phoenix.iterate.GroupedAggregatingResultIterator;
 import org.apache.phoenix.iterate.LimitingResultIterator;
+import org.apache.phoenix.iterate.LookAheadResultIterator;
 import org.apache.phoenix.iterate.MergeSortRowKeyResultIterator;
 import org.apache.phoenix.iterate.OffsetResultIterator;
 import org.apache.phoenix.iterate.OrderedAggregatingResultIterator;
@@ -261,7 +262,7 @@ public class AggregatePlan extends BaseQueryPlan {
         }
 
         if (cursorName != null) {
-            resultScanner = new CursorResultIterator(resultScanner, cursorName);
+            resultScanner = new CursorResultIterator(LookAheadResultIterator.wrap(resultScanner), cursorName);
         }
         return resultScanner;
     }

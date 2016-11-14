@@ -23,29 +23,43 @@ import org.apache.phoenix.util.CursorUtil;
 import java.sql.SQLException;
 import java.util.List;
 
-public class CursorResultIterator extends DelegateResultIterator {
+public class CursorResultIterator implements ResultIterator {
     private String cursorName;
-
-    public CursorResultIterator(ResultIterator delegate, String cursorName) {
-        super(delegate);
+    private PeekingResultIterator delegate;
+    //TODO Configure fetch size from FETCH call
+    private int fetchSize=1;
+    public CursorResultIterator(PeekingResultIterator delegate, String cursorName) {
+        this.delegate = delegate;
         this.cursorName = cursorName;
     }
 
     @Override
     public Tuple next() throws SQLException {
-        Tuple next = super.next();
-        CursorUtil.updateCursor(cursorName, next);
+        if(!CursorUtil.moreValues(cursorName)){
+	    return null;
+        }
+	if (fetchSize <= 0) {
+		return null;
+	}
+        Tuple next = delegate.next();
+        CursorUtil.updateCursor(cursorName,next, delegate.peek());
+        fetchSize--;
         return next;
     }
 
     @Override
     public void explain(List<String> planSteps) {
-        super.explain(planSteps);
+        delegate.explain(planSteps);
         planSteps.add("CLIENT CURSOR " + cursorName);
     }
 
     @Override
     public String toString() {
         return "CursorResultIterator [cursor=" + cursorName + "]";
+    }
+
+    @Override
+    public void close() throws SQLException {
+        delegate.close();
     }
 }

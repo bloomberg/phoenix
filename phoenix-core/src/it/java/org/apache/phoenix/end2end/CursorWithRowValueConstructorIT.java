@@ -92,7 +92,7 @@ public class CursorWithRowValueConstructorIT extends BaseClientManagedTimeIT {
             while(rs.next()){
                 assertEquals(rowID,rs.getInt(1));
                 ++rowID;
-                rs = DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).executeQuery();
+                rs = DriverManager.getConnection(getUrl()).createStatement(cursorSQL).executeQuery(cursorSQL);
             }
         } finally{
             DriverManager.getConnection(getUrl()).prepareStatement("CLOSE testCursor").execute();
@@ -198,11 +198,12 @@ public class CursorWithRowValueConstructorIT extends BaseClientManagedTimeIT {
             cursorSQL = "FETCH PRIOR FROM testCursor";
             rs = DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).executeQuery();
             rowID = 98;
-            while(rs.next()){
+            assertTrue(rs.next());
+            do {
                 assertEquals(rowID,rs.getInt(1));
                 --rowID;
                 rs = DriverManager.getConnection(getUrl()).prepareStatement(cursorSQL).executeQuery();
-            }
+            }while(rs.next());
         } finally{
             DriverManager.getConnection(getUrl()).prepareStatement("CLOSE testCursor").execute();
             deleteTestTable();

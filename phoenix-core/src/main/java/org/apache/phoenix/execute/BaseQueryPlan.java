@@ -97,7 +97,7 @@ public abstract class BaseQueryPlan implements QueryPlan {
     protected final StatementContext context;
     protected final FilterableStatement statement;
     protected final RowProjector projection;
-    protected final String cursorName;
+    protected String cursorName;
     protected final ParameterMetaData paramMetaData;
     protected final Integer limit;
     protected final Integer offset;

@@ -734,7 +734,9 @@ public class PhoenixStatement implements Statement, SQLCloseable {
 
         @Override
         public MutationPlan compilePlan(PhoenixStatement stmt, Sequence.ValueOp seqAction) throws SQLException {
-            DeclareCursorCompiler compiler = new DeclareCursorCompiler(stmt, this.getOperation());
+            ExecutableSelectStatement wrappedSelect = new ExecutableSelectStatement(
+		(ExecutableSelectStatement) stmt.parseStatement(this.getQuerySQL()),new CursorName(this.getCursorName()));
+            DeclareCursorCompiler compiler = new DeclareCursorCompiler(stmt, this.getOperation(),wrappedSelect.compilePlan(stmt, seqAction));
             return compiler.compile(this);
         }
     }
@@ -770,9 +772,7 @@ public class PhoenixStatement implements Statement, SQLCloseable {
 
         @Override
         public QueryPlan compilePlan(PhoenixStatement stmt, Sequence.ValueOp seqAction) throws SQLException {
-            CompilableStatement internalSelect = stmt.parseStatement(CursorUtil.getFetchSQL(this.getCursorName().getName(), this.isNext()));
-            ExecutableSelectStatement wrappedSelect =  new ExecutableSelectStatement((ExecutableSelectStatement)internalSelect, this.getCursorName());
-            return wrappedSelect.compilePlan(new PhoenixStatement(stmt.getConnection()), seqAction);
+            return CursorUtil.getFetchPlan(this.getCursorName().getName(), this.isNext());
         }
     }
 

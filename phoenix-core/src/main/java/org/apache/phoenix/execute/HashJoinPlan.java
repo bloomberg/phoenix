@@ -53,6 +53,7 @@ import org.apache.phoenix.expression.RowValueConstructorExpression;
 import org.apache.phoenix.iterate.CursorResultIterator;
 import org.apache.phoenix.iterate.DefaultParallelScanGrouper;
 import org.apache.phoenix.iterate.FilterResultIterator;
+import org.apache.phoenix.iterate.LookAheadResultIterator;
 import org.apache.phoenix.iterate.ParallelScanGrouper;
 import org.apache.phoenix.iterate.ResultIterator;
 import org.apache.phoenix.jdbc.PhoenixConnection;
@@ -230,7 +231,7 @@ public class HashJoinPlan extends DelegateQueryPlan {
             iterator = new FilterResultIterator(iterator, postFilter);
         }
         if (statement.getCursorName() != null) {
-            iterator = new CursorResultIterator(iterator, statement.getCursorName().getName());
+            iterator = new CursorResultIterator(LookAheadResultIterator.wrap(iterator), statement.getCursorName().getName());
         }
         
         return iterator;

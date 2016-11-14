@@ -136,6 +136,7 @@ import org.apache.phoenix.compile.MutationPlan;
 import org.apache.phoenix.compile.PostDDLCompiler;
 import org.apache.phoenix.compile.PostIndexDDLCompiler;
 import org.apache.phoenix.compile.PostLocalIndexDDLCompiler;
+import org.apache.phoenix.compile.QueryPlan;
 import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.compile.StatementNormalizer;
 import org.apache.phoenix.coprocessor.BaseScannerRegionObserver;
@@ -1213,8 +1214,8 @@ public class MetaDataClient {
         return fullName;
     }
 
-    public MutationState declareCursor(DeclareCursorStatement statement) throws SQLException {
-        CursorUtil.declareCursor(statement);
+    public MutationState declareCursor(DeclareCursorStatement statement, QueryPlan queryPlan) throws SQLException {
+        CursorUtil.declareCursor(statement, queryPlan);
         return new MutationState(0,connection);
     }
 

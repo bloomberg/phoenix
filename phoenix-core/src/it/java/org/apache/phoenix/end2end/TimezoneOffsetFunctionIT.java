@@ -42,6 +42,7 @@ public class TimezoneOffsetFunctionIT extends BaseHBaseManagedTimeTableReuseIT {
 		String timezone_offset_test = generateRandomString();
 		String ddl = "CREATE TABLE IF NOT EXISTS " + timezone_offset_test
 				+ " (k1 INTEGER NOT NULL, dates DATE CONSTRAINT pk PRIMARY KEY (k1))";
+		conn.createStatement().execute("SELECT * from SYSTEM.FUNCTION");
 		conn.createStatement().execute(ddl);
 		String dml = "UPSERT INTO " + timezone_offset_test
 				+ " (k1, dates) VALUES (1, TO_DATE('2014-02-02 00:00:00'))";

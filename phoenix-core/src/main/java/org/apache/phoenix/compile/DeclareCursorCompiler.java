@@ -43,10 +43,12 @@ import java.util.List;
 public class DeclareCursorCompiler {
     private final PhoenixStatement statement;
     private final Operation operation;
+    private QueryPlan queryPlan;
 
-    public DeclareCursorCompiler(PhoenixStatement statement, Operation operation) {
+    public DeclareCursorCompiler(PhoenixStatement statement, Operation operation, QueryPlan queryPlan) {
         this.statement = statement;
         this.operation = operation;
+        this.queryPlan = queryPlan;
     }
 
     public MutationPlan compile(final DeclareCursorStatement declare) throws SQLException {
@@ -61,7 +63,7 @@ public class DeclareCursorCompiler {
         return new BaseMutationPlan(context, operation) {
             @Override
             public MutationState execute() throws SQLException {
-                return client.declareCursor(declare);
+                return client.declareCursor(declare, queryPlan);
             }
 
             @Override

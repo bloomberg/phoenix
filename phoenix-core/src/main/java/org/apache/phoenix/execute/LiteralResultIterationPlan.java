@@ -29,6 +29,7 @@ import org.apache.phoenix.compile.OrderByCompiler.OrderBy;
 import org.apache.phoenix.compile.RowProjector;
 import org.apache.phoenix.compile.StatementContext;
 import org.apache.phoenix.iterate.CursorResultIterator;
+import org.apache.phoenix.iterate.LookAheadResultIterator;
 import org.apache.phoenix.iterate.ParallelIteratorFactory;
 import org.apache.phoenix.iterate.ParallelScanGrouper;
 import org.apache.phoenix.iterate.ResultIterator;
@@ -110,7 +111,7 @@ public class LiteralResultIterationPlan extends BaseQueryPlan {
         }
 
         if (cursorName != null){
-            scanner = new CursorResultIterator(scanner, cursorName);
+            scanner = new CursorResultIterator(LookAheadResultIterator.wrap(scanner), cursorName);
         }
 
         return scanner;
