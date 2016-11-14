@@ -92,7 +92,7 @@ public class CursorWithRowValueConstructorIT extends BaseClientManagedTimeIT {
             while(rs.next()){
                 assertEquals(rowID,rs.getInt(1));
                 ++rowID;
-                rs = DriverManager.getConnection(getUrl()).createStatement(cursorSQL).executeQuery(cursorSQL);
+                rs = DriverManager.getConnection(getUrl()).createStatement().executeQuery(cursorSQL);
             }
         } finally{
             DriverManager.getConnection(getUrl()).prepareStatement("CLOSE testCursor").execute();
