@@ -78,7 +78,7 @@ public class PhoenixClientProject extends PhoenixAbstractProject {
         final SequenceManager seqManager = sequence == null ?
                 null : new SequenceManager(new PhoenixStatement(sequence.pc));
         implementor.setSequenceManager(seqManager);
-        TupleProjector tupleProjector = project(implementor);
+        TupleProjector tupleProjector = super.project(implementor);
         if (seqManager != null) {
             try {
                 seqManager.validateSequences(Sequence.ValueOp.VALIDATE_SEQUENCE);

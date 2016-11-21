@@ -1115,6 +1115,14 @@ public class CalciteUtils {
                         || call.getKind() == SqlKind.NEXT_VALUE)) {
                 sequenceValueCall = call;
             }
+            if (sequenceValueCall == null){
+                for(RexNode node : call.getOperands()){
+                    if(node.getKind() == SqlKind.CURRENT_VALUE ||
+                            node.getKind() == SqlKind.NEXT_VALUE ){
+                        sequenceValueCall = (RexCall) node;
+                    }
+                }
+            }
             return null;
         }
     }
